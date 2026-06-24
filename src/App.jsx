@@ -4,7 +4,7 @@ const INITIAL = {
   nombre: '', nacionalidad: '', whatsapp: '', email: '',
   destino: '', fecha_llegada: '', fecha_salida: '', fechas_flexibles: '',
   adultos: '', ninos: '', edad_ninos: '',
-  tipo_hospedaje: '', manejo_presupuesto: '', presupuesto: '', zona: '', recomendar_zona: '',
+  tipo_hospedaje: '', manejo_presupuesto: '', presupuesto: '', habitaciones: '', distribucion: '', tipo_cama: '', zona: '', recomendar_zona: '',
   prioridades: [],
   servicios: [],
   motivo: '',
@@ -58,7 +58,7 @@ export default function App() {
     const required = {
       1: ['nombre', 'nacionalidad', 'whatsapp', 'email'],
       2: ['destino', 'fecha_llegada', 'fecha_salida', 'adultos'],
-      3: ['tipo_hospedaje', 'manejo_presupuesto', 'presupuesto'],
+      3: ['tipo_hospedaje', 'manejo_presupuesto', 'presupuesto', 'habitaciones'],
       4: [],
       5: [],
       6: ['motivo'],
@@ -263,6 +263,31 @@ export default function App() {
                   <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">Presupuesto aproximado (USD) <span className="text-red-400">*</span></label>
                   <input type="number" name="presupuesto" value={form.presupuesto} onChange={handleChange} placeholder="Ej: 150"
                     className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
+                </div>
+                <div>
+                  <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">Número de habitaciones <span className="text-red-400">*</span></label>
+                  <input type="number" min="1" name="habitaciones" value={form.habitaciones} onChange={handleChange} placeholder="Ej: 2"
+                    className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
+                </div>
+                <div>
+                  <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">¿Cómo desea distribuir a los viajeros en las habitaciones?</label>
+                  <textarea name="distribucion" value={form.distribucion} onChange={handleChange} rows={2}
+                    placeholder="Ej: 2 adultos en habitación 1, 2 adultos y 1 niño en habitación 2"
+                    className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange resize-none" />
+                </div>
+                <div>
+                  <label className="font-body text-sm font-medium text-gray-700 block mb-3">Preferencia de tipo de cama</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['Cama doble (matrimonial)', 'Camas separadas (twin)', 'Indiferente'].map(op => (
+                      <button key={op} type="button" onClick={() => setForm(f => ({ ...f, tipo_cama: op }))}
+                        className={`py-2.5 px-3 rounded-xl font-body text-sm border-2 transition-colors text-left ${form.tipo_cama === op ? 'bg-brand-navy text-white border-brand-navy' : 'bg-white text-gray-600 border-gray-200 hover:border-brand-navy'}`}>
+                        {op}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="font-body text-gray-400 text-xs mt-2">
+                    💡 La preferencia de tipo de cama no siempre está garantizada ya que depende de la disponibilidad del hotel. Haremos nuestro mejor esfuerzo para conseguirla.
+                  </p>
                 </div>
                 <div>
                   <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">¿Tiene una zona específica donde hospedarse?</label>

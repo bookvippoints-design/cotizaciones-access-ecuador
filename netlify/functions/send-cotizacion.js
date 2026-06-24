@@ -105,6 +105,9 @@ function construirCorreo(d) {
     ${fila('Tipo de hospedaje', d.tipo_hospedaje)}
     ${fila('Manejo de presupuesto', d.manejo_presupuesto)}
     ${fila('Presupuesto (USD)', d.presupuesto ? `$${d.presupuesto}` : '')}
+    ${fila('Número de habitaciones', d.habitaciones)}
+    ${fila('Distribución de viajeros', d.distribucion)}
+    ${fila('Preferencia de cama', d.tipo_cama)}
     ${fila('Zona específica', d.zona)}
     ${fila('¿Recomendar zona?', d.recomendar_zona)}
 
