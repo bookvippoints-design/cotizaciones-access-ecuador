@@ -156,7 +156,7 @@ exports.handler = async (event) => {
       ? Math.ceil((new Date(data.fecha_salida) - new Date(data.fecha_llegada)) / (1000 * 60 * 60 * 24))
       : ''
 
-    const asunto = `🏨 Cotización: ${data.destino || 'Sin destino'} | ${data.fecha_llegada} → ${data.fecha_salida} | ${data.adultos} adulto(s)`
+    const asunto = `Cotizacion de Hospedaje: ${data.destino || 'Sin destino'} | ${data.fecha_llegada} al ${data.fecha_salida} | ${data.adultos} adulto(s)`
 
     // Enviar a todos los operadores
     for (const correo of OPERADORES) {
