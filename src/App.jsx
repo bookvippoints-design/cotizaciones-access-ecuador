@@ -58,11 +58,11 @@ export default function App() {
     const required = {
       1: ['nombre', 'nacionalidad', 'whatsapp', 'email'],
       2: ['destino', 'fecha_llegada', 'fecha_salida', 'adultos'],
-      3: ['tipo_hospedaje', 'manejo_presupuesto', 'presupuesto', 'habitaciones'],
+      3: ['habitaciones'],
       4: [],
       5: [],
-      6: ['motivo'],
-      7: ['visa', 'vuelos', 'ver_sobre_presupuesto'],
+      6: [],
+      7: ['ver_sobre_presupuesto'],
     }
     return required[step].every(f => form[f] !== '')
   }
@@ -238,7 +238,7 @@ export default function App() {
               <div className="space-y-5">
                 <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">🏨 Hospedaje</h2>
                 <div>
-                  <label className="font-body text-sm font-medium text-gray-700 block mb-3">Tipo de hospedaje <span className="text-red-400">*</span></label>
+                  <label className="font-body text-sm font-medium text-gray-700 block mb-3">Tipo de hospedaje</label>
                   <div className="grid grid-cols-2 gap-2">
                     {['Hotel', 'Resort Todo Incluido', 'Departamento', 'Aparthotel', 'Villa', 'Casa vacacional', 'Indiferente'].map(op => (
                       <button key={op} type="button" onClick={() => setForm(f => ({ ...f, tipo_hospedaje: op }))}
@@ -249,7 +249,7 @@ export default function App() {
                   </div>
                 </div>
                 <div>
-                  <label className="font-body text-sm font-medium text-gray-700 block mb-3">¿Cómo desea manejar su presupuesto? <span className="text-red-400">*</span></label>
+                  <label className="font-body text-sm font-medium text-gray-700 block mb-3">¿Cómo desea manejar su presupuesto?</label>
                   <div className="flex gap-3">
                     {['Presupuesto por noche', 'Presupuesto por estadía completa'].map(op => (
                       <button key={op} type="button" onClick={() => setForm(f => ({ ...f, manejo_presupuesto: op }))}
@@ -260,7 +260,7 @@ export default function App() {
                   </div>
                 </div>
                 <div>
-                  <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">Presupuesto aproximado (USD) <span className="text-red-400">*</span></label>
+                  <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">Presupuesto aproximado (USD)</label>
                   <input type="number" name="presupuesto" value={form.presupuesto} onChange={handleChange} placeholder="Ej: 150"
                     className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
                 </div>
@@ -376,7 +376,7 @@ export default function App() {
                   { name: 'ver_sobre_presupuesto', label: 'Si encontramos una opción mejor que supera su presupuesto, ¿le gustaría verla?', opciones: ['Sí', 'No'] },
                 ].map(campo => (
                   <div key={campo.name}>
-                    <label className="font-body text-sm font-medium text-gray-700 block mb-3">{campo.label} <span className="text-red-400">*</span></label>
+                    <label className="font-body text-sm font-medium text-gray-700 block mb-3">{campo.label}</label>
                     <div className="flex gap-2">
                       {campo.opciones.map(op => (
                         <button key={op} type="button" onClick={() => setForm(f => ({ ...f, [campo.name]: op }))}
