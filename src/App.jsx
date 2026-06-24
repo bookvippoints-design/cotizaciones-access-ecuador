@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
 const INITIAL = {
-  nombre: '', nacionalidad: '', pais: '', ciudad: '', whatsapp: '', email: '',
+  nombre: '', nacionalidad: '', whatsapp: '', email: '',
   destino: '', fecha_llegada: '', fecha_salida: '', fechas_flexibles: '',
   adultos: '', ninos: '', edad_ninos: '',
   tipo_hospedaje: '', manejo_presupuesto: '', presupuesto: '', zona: '', recomendar_zona: '',
-  prioridad: '',
+  prioridades: [],
   servicios: [],
   motivo: '',
   visa: '', vuelos: '', ver_sobre_presupuesto: '', comentarios: '',
@@ -17,14 +17,21 @@ const SERVICIOS = [
   'WiFi', 'Cerca de atracciones', 'Cerca de transporte público', 'Pet Friendly',
 ]
 
+const PRIORIDADES = ['Precio', 'Ubicación', 'Calidad del hotel', 'Comodidad de la habitación', 'Servicios del hotel']
+
+const totalSteps = 7
+
+const secciones = [
+  'Datos Personales', 'Información del Viaje', 'Hospedaje',
+  'Prioridades', 'Servicios', 'Motivo', 'Información Adicional',
+]
+
 export default function App() {
   const [form, setForm] = useState(INITIAL)
   const [step, setStep] = useState(1)
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
-
-  const totalSteps = 8
 
   function handleChange(e) {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }))
@@ -39,16 +46,23 @@ export default function App() {
     }))
   }
 
+  function handlePrioridad(p) {
+    setForm(f => {
+      if (f.prioridades.includes(p)) return { ...f, prioridades: f.prioridades.filter(x => x !== p) }
+      if (f.prioridades.length >= 2) return f // máximo 2
+      return { ...f, prioridades: [...f.prioridades, p] }
+    })
+  }
+
   function validarStep() {
     const required = {
-      1: ['nombre', 'nacionalidad', 'pais', 'ciudad', 'whatsapp', 'email'],
-      2: ['destino', 'fecha_llegada', 'fecha_salida'],
-      3: ['adultos'],
-      4: ['tipo_hospedaje', 'manejo_presupuesto', 'presupuesto'],
-      5: ['prioridad'],
-      6: [],
-      7: ['motivo'],
-      8: ['visa', 'vuelos', 'ver_sobre_presupuesto'],
+      1: ['nombre', 'nacionalidad', 'whatsapp', 'email'],
+      2: ['destino', 'fecha_llegada', 'fecha_salida', 'adultos'],
+      3: ['tipo_hospedaje', 'manejo_presupuesto', 'presupuesto'],
+      4: [],
+      5: [],
+      6: ['motivo'],
+      7: ['visa', 'vuelos', 'ver_sobre_presupuesto'],
     }
     return required[step].every(f => form[f] !== '')
   }
@@ -77,8 +91,8 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
-      if (res.ok) { setSent(true) }
-      else { setError('Hubo un error al enviar. Intente nuevamente.') }
+      if (res.ok) setSent(true)
+      else setError('Hubo un error al enviar. Intente nuevamente.')
     } catch {
       setError('Hubo un error al enviar. Intente nuevamente.')
     }
@@ -89,11 +103,9 @@ export default function App() {
     <div className="min-h-screen bg-warm-bg flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-white rounded-3xl p-10 shadow-xl text-center">
         <div className="text-6xl mb-4">✈️</div>
-        <h2 className="font-heading font-extrabold text-brand-navy text-2xl mb-3">
-          ¡Solicitud enviada!
-        </h2>
+        <h2 className="font-heading font-extrabold text-brand-navy text-2xl mb-3">¡Solicitud enviada!</h2>
         <p className="font-body text-gray-500 text-sm leading-relaxed mb-6">
-          Hemos recibido su solicitud de cotización. Nuestro equipo la revisará y le contactará a la brevedad posible por WhatsApp o correo electrónico.
+          Hemos recibido su solicitud. Nuestro equipo la revisará y le contactará a la brevedad por WhatsApp o correo electrónico.
         </p>
         <div className="bg-warm-bg rounded-2xl p-4 text-left mb-6">
           <p className="font-body text-gray-600 text-sm"><strong>Destino:</strong> {form.destino}</p>
@@ -101,10 +113,8 @@ export default function App() {
           <p className="font-body text-gray-600 text-sm"><strong>Salida:</strong> {form.fecha_salida}</p>
           <p className="font-body text-gray-600 text-sm"><strong>Viajeros:</strong> {form.adultos} adulto(s){form.ninos ? `, ${form.ninos} niño(s)` : ''}</p>
         </div>
-        <button
-          onClick={() => { setForm(INITIAL); setStep(1); setSent(false) }}
-          className="w-full bg-brand-orange text-white font-heading font-bold text-sm px-6 py-3.5 rounded-xl hover:bg-orange-500 transition-colors"
-        >
+        <button onClick={() => { setForm(INITIAL); setStep(1); setSent(false) }}
+          className="w-full bg-brand-orange text-white font-heading font-bold text-sm px-6 py-3.5 rounded-xl hover:bg-orange-500 transition-colors">
           Nueva solicitud
         </button>
       </div>
@@ -113,17 +123,11 @@ export default function App() {
 
   const progreso = Math.round((step / totalSteps) * 100)
 
-  const secciones = [
-    'Datos Personales', 'Información del Viaje', 'Viajeros',
-    'Hospedaje', 'Prioridades', 'Servicios', 'Motivo', 'Información Adicional',
-  ]
-
   return (
     <div className="min-h-screen bg-warm-bg">
       {/* Header */}
       <div className="bg-brand-navy py-6 px-4">
         <div className="max-w-2xl mx-auto">
-          <p className="font-heading font-bold text-brand-orange text-xs uppercase tracking-widest mb-1">Access Ecuador</p>
           <h1 className="font-heading font-extrabold text-white text-xl md:text-2xl">
             Solicitud de Cotización de Hospedaje
           </h1>
@@ -143,10 +147,7 @@ export default function App() {
             <p className="font-heading font-bold text-brand-orange text-xs">{progreso}%</p>
           </div>
           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-brand-orange rounded-full transition-all duration-500"
-              style={{ width: `${progreso}%` }}
-            />
+            <div className="h-full bg-brand-orange rounded-full transition-all duration-500" style={{ width: `${progreso}%` }} />
           </div>
         </div>
       </div>
@@ -156,17 +157,13 @@ export default function App() {
         <form onSubmit={handleSubmit}>
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
 
-            {/* SECCIÓN 1 */}
+            {/* SECCIÓN 1 — Datos Personales */}
             {step === 1 && (
               <div className="space-y-5">
-                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">
-                  🧑 Datos Personales
-                </h2>
+                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">🧑 Datos Personales</h2>
                 {[
                   { name: 'nombre', label: 'Nombre completo', required: true },
                   { name: 'nacionalidad', label: 'Nacionalidad', required: true },
-                  { name: 'pais', label: 'País de residencia', required: true },
-                  { name: 'ciudad', label: 'Ciudad de residencia', required: true },
                   { name: 'whatsapp', label: 'WhatsApp (con código de país)', required: true, placeholder: '+593999123456' },
                   { name: 'email', label: 'Correo electrónico', required: true, type: 'email' },
                 ].map(f => (
@@ -174,37 +171,33 @@ export default function App() {
                     <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">
                       {f.label} {f.required && <span className="text-red-400">*</span>}
                     </label>
-                    <input
-                      type={f.type || 'text'}
-                      name={f.name}
-                      value={form[f.name]}
-                      onChange={handleChange}
+                    <input type={f.type || 'text'} name={f.name} value={form[f.name]} onChange={handleChange}
                       placeholder={f.placeholder || ''}
-                      className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange"
-                    />
+                      className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
                   </div>
                 ))}
               </div>
             )}
 
-            {/* SECCIÓN 2 */}
+            {/* SECCIÓN 2 — Viaje + Viajeros */}
             {step === 2 && (
               <div className="space-y-5">
-                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">
-                  🌍 Información del Viaje
-                </h2>
+                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">🌍 Información del Viaje</h2>
                 <div>
                   <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">Destino <span className="text-red-400">*</span></label>
-                  <input type="text" name="destino" value={form.destino} onChange={handleChange} placeholder="Ej: Cancún, México" className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
+                  <input type="text" name="destino" value={form.destino} onChange={handleChange} placeholder="Ej: Cancún, México"
+                    className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">Fecha de llegada <span className="text-red-400">*</span></label>
-                    <input type="date" name="fecha_llegada" value={form.fecha_llegada} onChange={handleChange} className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
+                    <input type="date" name="fecha_llegada" value={form.fecha_llegada} onChange={handleChange}
+                      className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
                   </div>
                   <div>
                     <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">Fecha de salida <span className="text-red-400">*</span></label>
-                    <input type="date" name="fecha_salida" value={form.fecha_salida} onChange={handleChange} className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
+                    <input type="date" name="fecha_salida" value={form.fecha_salida} onChange={handleChange}
+                      className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
                   </div>
                 </div>
                 <div>
@@ -218,40 +211,32 @@ export default function App() {
                     ))}
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* SECCIÓN 3 */}
-            {step === 3 && (
-              <div className="space-y-5">
-                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">
-                  👥 Viajeros
-                </h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">Número de adultos <span className="text-red-400">*</span></label>
-                    <input type="number" min="1" name="adultos" value={form.adultos} onChange={handleChange} className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
+                    <input type="number" min="1" name="adultos" value={form.adultos} onChange={handleChange}
+                      className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
                   </div>
                   <div>
                     <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">Número de niños</label>
-                    <input type="number" min="0" name="ninos" value={form.ninos} onChange={handleChange} className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
+                    <input type="number" min="0" name="ninos" value={form.ninos} onChange={handleChange}
+                      className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
                   </div>
                 </div>
                 {form.ninos > 0 && (
                   <div>
                     <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">Edad de los niños</label>
-                    <input type="text" name="edad_ninos" value={form.edad_ninos} onChange={handleChange} placeholder="Ej: 3, 7, 10" className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
+                    <input type="text" name="edad_ninos" value={form.edad_ninos} onChange={handleChange} placeholder="Ej: 3, 7, 10"
+                      className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
                   </div>
                 )}
               </div>
             )}
 
-            {/* SECCIÓN 4 */}
-            {step === 4 && (
+            {/* SECCIÓN 3 — Hospedaje */}
+            {step === 3 && (
               <div className="space-y-5">
-                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">
-                  🏨 Hospedaje
-                </h2>
+                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">🏨 Hospedaje</h2>
                 <div>
                   <label className="font-body text-sm font-medium text-gray-700 block mb-3">Tipo de hospedaje <span className="text-red-400">*</span></label>
                   <div className="grid grid-cols-2 gap-2">
@@ -276,11 +261,13 @@ export default function App() {
                 </div>
                 <div>
                   <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">Presupuesto aproximado (USD) <span className="text-red-400">*</span></label>
-                  <input type="number" name="presupuesto" value={form.presupuesto} onChange={handleChange} placeholder="Ej: 150" className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
+                  <input type="number" name="presupuesto" value={form.presupuesto} onChange={handleChange} placeholder="Ej: 150"
+                    className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange" />
                 </div>
                 <div>
                   <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">¿Tiene una zona específica donde hospedarse?</label>
-                  <textarea name="zona" value={form.zona} onChange={handleChange} rows={2} placeholder="Ej: Zona hotelera, centro histórico..." className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange resize-none" />
+                  <textarea name="zona" value={form.zona} onChange={handleChange} rows={2} placeholder="Ej: Zona hotelera, centro histórico..."
+                    className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange resize-none" />
                 </div>
                 <div>
                   <label className="font-body text-sm font-medium text-gray-700 block mb-3">Si no conoce el destino, ¿desea que le recomendemos la mejor zona?</label>
@@ -296,33 +283,36 @@ export default function App() {
               </div>
             )}
 
-            {/* SECCIÓN 5 */}
-            {step === 5 && (
+            {/* SECCIÓN 4 — Prioridades (máx 2) */}
+            {step === 4 && (
               <div className="space-y-5">
-                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">
-                  ⭐ Prioridades
-                </h2>
+                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">⭐ Prioridades</h2>
                 <div>
-                  <label className="font-body text-sm font-medium text-gray-700 block mb-3">¿Qué es más importante para usted? <span className="text-red-400">*</span></label>
+                  <label className="font-body text-sm font-medium text-gray-700 block mb-1">¿Qué es más importante para usted?</label>
+                  <p className="font-body text-gray-400 text-xs mb-3">Seleccione hasta 2 opciones.</p>
                   <div className="space-y-2">
-                    {['Precio', 'Ubicación', 'Calidad del hotel', 'Comodidad de la habitación', 'Servicios del hotel'].map(op => (
-                      <button key={op} type="button" onClick={() => setForm(f => ({ ...f, prioridad: op }))}
-                        className={`w-full py-3 px-4 rounded-xl font-body text-sm border-2 transition-colors text-left flex items-center gap-3 ${form.prioridad === op ? 'bg-brand-navy text-white border-brand-navy' : 'bg-white text-gray-600 border-gray-200 hover:border-brand-navy'}`}>
-                        <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${form.prioridad === op ? 'border-white bg-brand-orange' : 'border-gray-300'}`} />
-                        {op}
-                      </button>
-                    ))}
+                    {PRIORIDADES.map(op => {
+                      const seleccionada = form.prioridades.includes(op)
+                      const deshabilitada = !seleccionada && form.prioridades.length >= 2
+                      return (
+                        <button key={op} type="button" onClick={() => handlePrioridad(op)} disabled={deshabilitada}
+                          className={`w-full py-3 px-4 rounded-xl font-body text-sm border-2 transition-colors text-left flex items-center gap-3
+                            ${seleccionada ? 'bg-brand-navy text-white border-brand-navy' : deshabilitada ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed' : 'bg-white text-gray-600 border-gray-200 hover:border-brand-navy'}`}>
+                          <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${seleccionada ? 'border-white bg-brand-orange' : 'border-gray-300'}`} />
+                          {op}
+                          {seleccionada && <span className="ml-auto text-brand-orange text-xs font-bold">✓</span>}
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* SECCIÓN 6 */}
-            {step === 6 && (
+            {/* SECCIÓN 5 — Servicios */}
+            {step === 5 && (
               <div className="space-y-5">
-                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">
-                  🛎️ Servicios Importantes
-                </h2>
+                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">🛎️ Servicios Importantes</h2>
                 <p className="font-body text-gray-500 text-sm">Seleccione todos los que apliquen.</p>
                 <div className="grid grid-cols-2 gap-2">
                   {SERVICIOS.map(s => (
@@ -336,12 +326,10 @@ export default function App() {
               </div>
             )}
 
-            {/* SECCIÓN 7 */}
-            {step === 7 && (
+            {/* SECCIÓN 6 — Motivo */}
+            {step === 6 && (
               <div className="space-y-5">
-                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">
-                  🎯 Motivo del Viaje
-                </h2>
+                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">🎯 Motivo del Viaje</h2>
                 <div className="grid grid-cols-2 gap-2">
                   {['Vacaciones', 'Luna de miel', 'Aniversario', 'Cumpleaños', 'Familiar', 'Negocios', 'Compras', 'Turismo', 'Otro'].map(op => (
                     <button key={op} type="button" onClick={() => setForm(f => ({ ...f, motivo: op }))}
@@ -353,12 +341,10 @@ export default function App() {
               </div>
             )}
 
-            {/* SECCIÓN 8 */}
-            {step === 8 && (
+            {/* SECCIÓN 7 — Información Adicional */}
+            {step === 7 && (
               <div className="space-y-5">
-                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">
-                  📋 Información Adicional
-                </h2>
+                <h2 className="font-heading font-bold text-brand-navy text-lg border-b border-gray-100 pb-3">📋 Información Adicional</h2>
                 {[
                   { name: 'visa', label: '¿Posee visa vigente para el destino?', opciones: ['Sí', 'No', 'No aplica'] },
                   { name: 'vuelos', label: '¿Ya tiene vuelos comprados?', opciones: ['Sí', 'No'] },
@@ -378,12 +364,13 @@ export default function App() {
                 ))}
                 <div>
                   <label className="font-body text-sm font-medium text-gray-700 block mb-1.5">Comentarios adicionales</label>
-                  <textarea name="comentarios" value={form.comentarios} onChange={handleChange} rows={4} placeholder="Cualquier información adicional que nos ayude a encontrar la mejor opción para usted..." className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange resize-none" />
+                  <textarea name="comentarios" value={form.comentarios} onChange={handleChange} rows={4}
+                    placeholder="Cualquier información adicional que nos ayude a encontrar la mejor opción..."
+                    className="w-full px-4 py-3 font-body text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-orange resize-none" />
                 </div>
               </div>
             )}
 
-            {/* Error */}
             {error && <p className="font-body text-red-500 text-sm mt-4 bg-red-50 px-4 py-3 rounded-xl">{error}</p>}
 
             {/* Navegación */}
@@ -409,7 +396,6 @@ export default function App() {
           </div>
         </form>
 
-        {/* Footer */}
         <p className="text-center font-body text-gray-400 text-xs mt-6">
           Access Ecuador · admin@alfonsohidalgo.com · +593 958 900 029
         </p>
